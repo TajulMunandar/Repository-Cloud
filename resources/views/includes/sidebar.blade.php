@@ -13,12 +13,14 @@
                         <span><i class="fas fa-th-large"></i>{{ __('Dashboard') }}</span>
                     </p>
                 </a>
-                <a href="{{ route('users.index') }}"
-                    class="vironeer-sidebar-link {{ request()->is('users*') ? 'current' : '' }}">
-                    <p class="vironeer-sidebar-link-title">
-                        <span><i class="fa fa-users"></i> {{ __('Manage Users') }}</span>
-                    </p>
-                </a>
+                @if (auth()->user()->is_admin == 1)
+                    <a href="{{ route('users.index') }}"
+                        class="vironeer-sidebar-link {{ request()->is('users*') ? 'current' : '' }}">
+                        <p class="vironeer-sidebar-link-title">
+                            <span><i class="fa fa-users"></i> {{ __('Manage Users') }}</span>
+                        </p>
+                    </a>
+                @endif
                 <a href="{{ route('files.index') }}"
                     class="vironeer-sidebar-link  {{ request()->is('files*') ? 'current' : '' }} ">
                     <p class="vironeer-sidebar-link-title">
