@@ -154,13 +154,14 @@
                     {
                         data: 'is_active',
                         name: 'is_active',
-                        render: data => data ? '<span class="badge bg-success">Aktif</span>' :
+                        render: data => data == 1 ? '<span class="badge bg-success">Aktif</span>' :
                             '<span class="badge bg-danger">Tidak Aktif</span>'
                     },
                     {
                         data: 'is_admin',
                         name: 'is_admin',
-                        render: data => data ? '<span class="badge bg-primary">Admin</span>' :
+                        render: data => data == 1 ?
+                            '<span class="badge bg-primary">Admin</span>' :
                             '<span class="badge bg-secondary">User</span>'
                     },
                     {

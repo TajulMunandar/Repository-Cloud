@@ -5,18 +5,19 @@
         <h2 class="mb-4 fw-bold">📊 Dashboard Overview</h2>
         <div class="row g-4">
             <!-- Total Users -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card dashboard-card text-center shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="icon-wrapper bg-primary text-white mb-3">
-                            <i class="fa fa-users fs-2"></i>
+            @if (auth()->user()->is_admin == 1)
+                <div class="col-md-3 col-sm-6">
+                    <div class="card dashboard-card text-center shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="icon-wrapper bg-primary text-white mb-3">
+                                <i class="fa fa-users fs-2"></i>
+                            </div>
+                            <h6 class="fw-semibold text-secondary">Total Users</h6>
+                            <h3 class="fw-bold text-dark">{{ $totalUsers }}</h3>
                         </div>
-                        <h6 class="fw-semibold text-secondary">Total Users</h6>
-                        <h3 class="fw-bold text-dark">{{ $totalUsers }}</h3>
                     </div>
                 </div>
-            </div>
-
+            @endif
             <!-- Total Files -->
             <div class="col-md-3 col-sm-6">
                 <div class="card dashboard-card text-center shadow-sm border-0">
