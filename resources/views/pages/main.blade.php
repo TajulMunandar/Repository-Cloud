@@ -19,7 +19,7 @@
 
         .hero {
             min-height: 100vh;
-            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            background-image: url({{ asset('images/bg.jpg') }});
             color: white;
             display: flex;
             align-items: center;
@@ -67,7 +67,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Informatics Cloud</a>
+            <a class="navbar-brand fw-bold" href="#"><img src="{{ asset('images/dark-logo.png') }}" alt="Logo"
+                    class="img-fluid" style="height: 40px;"></a>
             <div class="ms-auto">
                 <a href="/login" class="btn btn-primary px-4">Login</a>
             </div>
@@ -77,7 +78,7 @@
     <!-- Hero -->
     <section class="hero">
         <div class="container">
-            <h1 class="mb-4">Kelola Dokumen Anda dengan Mudah & Aman</h1>
+            <h1 class="mb-4">Upload And Share Your File</h1>
             <p class="lead mb-4">Simpan, bagikan, dan kelola file secara modern dalam satu platform terpercaya.</p>
             <a href="#features" class="btn btn-light btn-lg px-4 me-2">Pelajari Lebih</a>
             <a href="/register" class="btn btn-outline-light btn-lg px-4">Daftar Gratis</a>

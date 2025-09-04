@@ -23,8 +23,20 @@
             <div class="card-footer">
                 <a href="{{ route('files.view', $file->id) }}" target="_blank" class="btn btn-primary">👁 Preview File</a>
                 <a href="{{ route('files.download', $file->id) }}" download class="btn btn-success">⬇ Download</a>
+                <button class="btn btn-warning" id="copyLinkBtn">📋 Copy Link</button>
                 <a href="{{ route('files.index') }}" class="btn btn-secondary">⬅ Kembali</a>
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('copyLinkBtn').addEventListener('click', function() {
+            const link = "{{ route('files.view', $file->id) }}";
+            navigator.clipboard.writeText(link).then(() => {
+                alert('✅ Link berhasil disalin!');
+            }).catch(err => {
+                alert('❌ Gagal menyalin link');
+            });
+        });
+    </script>
 @endsection

@@ -25,6 +25,11 @@
                         <h6 class="text-muted">Total Ukuran </h6>
                         <h3 class="fw-bold text-primary">
                             {{ number_format($files->sum('file_size') / 1024 / 1024, 2) }} MB
+                            @if (Auth::check() && Auth::user()->is_admin == 1)
+                                <span class="text-success">/ ♾️ Unlimited</span>
+                            @else
+                                <span class="text-danger">/ 1024 MB</span>
+                            @endif
                         </h3>
                         <small class="text-muted">Semua file yang sudah diupload</small>
                     </div>
