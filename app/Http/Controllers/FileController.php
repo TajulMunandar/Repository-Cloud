@@ -39,7 +39,7 @@ class FileController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:102400', // max 100MB
+            'file' => 'required|file|max:1024000', // max 100MB
             'expired_date' => 'nullable|date',
         ]);
 
@@ -149,10 +149,38 @@ class FileController extends Controller
     public function destroy(string $id)
     {
         $file = File::findOrFail($id);
+        $file->delete(); // soft delete, file fisik masih ada
 
+        return redirect()->back()->with('success', 'File dipindahkan ke Riwayat (Trash)!');
+    }
+
+    public function trash()
+    {
+        $files = File::onlyTrashed()
+            ->where('user_id', auth::id())
+            ->get();
+
+        return view('pages.trash', compact('files'));
+    }
+
+    public function restore($id)
+    {
+        $file = File::onlyTrashed()->where('user_id', auth::id())->findOrFail($id);
+        $file->restore();
+
+        return redirect()->route('files.trash')->with('success', 'File berhasil direstore!');
+    }
+
+    public function forceDelete($id)
+    {
+        $file = File::onlyTrashed()->where('user_id', auth()->id())->findOrFail($id);
+
+        // hapus fisik
         Storage::disk('public')->delete($file->file_path);
-        $file->delete();
 
-        return redirect()->back()->with('success', 'File berhasil dihapus!');
+        // hapus permanen record
+        $file->forceDelete();
+
+        return redirect()->route('files.trash')->with('success', 'File berhasil dihapus permanen!');
     }
 }

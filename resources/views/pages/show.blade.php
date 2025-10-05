@@ -13,7 +13,7 @@
                 <p><strong>Tanggal Expired:</strong> {{ $file->expired_date ?? '-' }}</p>
                 <p><strong>Total Views:</strong> {{ $file->total_views }}</p>
                 <p><strong>Total Downloads:</strong> {{ $file->total_downloads }}</p>
-                <p><strong>Bandwidth Upload:</strong>
+                <p><strong>Throughput Upload:</strong>
                     {{ $file->upload_bw ? number_format($file->upload_bw, 2) . ' KB/s' : '-' }}
                 </p>
                 <p><strong>Durasi Upload:</strong>

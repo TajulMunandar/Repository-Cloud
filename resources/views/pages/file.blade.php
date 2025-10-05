@@ -9,7 +9,7 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body text-center">
-                        <h6 class="text-muted">Total Bandwidth Terpakai</h6>
+                        <h6 class="text-muted">Total Throughput Terpakai</h6>
                         <h3 class="fw-bold text-warning">
                             {{ number_format($files->sum('upload_bw') / 1024 / 1024, 2) }} MB
                         </h3>
@@ -49,11 +49,19 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col d-flex">
+                <button type="button" class="btn btn-primary btn-lg shadow-sm mb-3 me-2" data-bs-toggle="modal"
+                    data-bs-target="#uploadModal">
+                    ⬆ Upload File
+                </button>
+                <a href="{{ route('files.trash') }}" class="btn btn-info btn-lg shadow-sm mb-3 ">
+                    <span><i class="fa fa-trash"></i> History File</span>
+                </a>
+            </div>
+        </div>
         <!-- Trigger Button -->
-        <button type="button" class="btn btn-primary btn-lg shadow-sm mb-3" data-bs-toggle="modal"
-            data-bs-target="#uploadModal">
-            ⬆ Upload File
-        </button>
+
 
         <!-- Upload Modal -->
         <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
