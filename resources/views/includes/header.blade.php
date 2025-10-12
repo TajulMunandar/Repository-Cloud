@@ -9,8 +9,8 @@
                 <img src="{{ asset('images/avatars/default.png') }}" alt="informaticloud" />
             </div>
             <div class="vironeer-user-info d-none d-md-block">
-                <p class="vironeer-user-title mb-0">Asep</p>
-                <p class="vironeer-user-text mb-0">asep@informaticloud.com</p>
+                <p class="vironeer-user-title mb-0">{{ Auth::user()->username }}</p>
+                <p class="vironeer-user-text mb-0">{{ Auth::user()->email }}</p>
             </div>
         </div>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
