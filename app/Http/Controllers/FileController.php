@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use App\Models\FileActivity;
+use App\Models\FileShare;
+use App\Models\Folder;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,16 +16,31 @@ class FileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        if (Auth::user()->is_admin == 0) {
-            // kalau admin, ambil semua file
-            $files = File::where('user_id', Auth::id())->get();
+        $folderId = $request->get('folder_id');
+
+        if (Auth::user()->is_admin == 1) {
+            // Admin melihat semua
+            $folders = $folderId
+                ? Folder::where('parent_id', $folderId)->get()  // Subfolders dari folder yang dibuka
+                : Folder::whereNull('parent_id')->get();        // Root folders
+            $files = $folderId
+                ? File::where('folder_id', $folderId)->get()
+                : File::whereNull('folder_id')->get();
         } else {
-            // kalau bukan admin, ambil file milik user login saja
-            $files = File::all();
+            // User biasa
+            $folders = $folderId
+                ? Folder::where('user_id', Auth::id())->where('parent_id', $folderId)->get()
+                : Folder::where('user_id', Auth::id())->whereNull('parent_id')->get();
+            $files = $folderId
+                ? File::where('user_id', Auth::id())->where('folder_id', $folderId)->get()
+                : File::where('user_id', Auth::id())->whereNull('folder_id')->get();
         }
-        return view('pages.file', compact('files'));
+
+        $currentFolder = $folderId ? Folder::find($folderId) : null;
+
+        return view('pages.file', compact('files', 'folders', 'currentFolder'));
     }
 
     /**
@@ -41,7 +59,13 @@ class FileController extends Controller
         $request->validate([
             'file' => 'required|file|max:1024000', // max 100MB
             'expired_date' => 'nullable|date',
+            'folder_id' => 'nullable|exists:folders,id',
         ]);
+
+        // Jika folder_id disediakan, pastikan user memiliki akses
+        if ($request->folder_id) {
+            $folder = Folder::where('user_id', Auth::id())->findOrFail($request->folder_id);
+        }
 
         $uploadedFile = $request->file('file');
         $path = $uploadedFile->store('uploads', 'public');
@@ -52,6 +76,7 @@ class FileController extends Controller
 
         File::create([
             'user_id' => Auth::id(),
+            'folder_id' => $request->folder_id,
             'file_name' => $uploadedFile->getClientOriginalName(),
             'file_path' => $path,
             'file_type' => $uploadedFile->getClientMimeType(),
@@ -124,7 +149,7 @@ class FileController extends Controller
             'activity_type' => 'download'
         ]);
 
-        return Storage::disk('public')->download($file->file_path, $file->file_name);
+        return response()->download(storage_path('app/public/' . $file->file_path), $file->file_name);
     }
 
     /**
@@ -173,7 +198,7 @@ class FileController extends Controller
 
     public function forceDelete($id)
     {
-        $file = File::onlyTrashed()->where('user_id', auth()->id())->findOrFail($id);
+        $file = File::onlyTrashed()->where('user_id', Auth::id())->findOrFail($id);
 
         // hapus fisik
         Storage::disk('public')->delete($file->file_path);
@@ -182,5 +207,63 @@ class FileController extends Controller
         $file->forceDelete();
 
         return redirect()->route('files.trash')->with('success', 'File berhasil dihapus permanen!');
+    }
+
+    public function rename(Request $request, $id)
+    {
+        $request->validate([
+            'file_name' => 'required|string|max:255'
+        ]);
+
+        $file = File::where('user_id', Auth::id())->findOrFail($id);
+        $file->update(['file_name' => $request->file_name]);
+
+        return response()->json(['success' => true, 'message' => 'File berhasil diubah nama!']);
+    }
+
+    public function share(Request $request, $id)
+    {
+        $request->validate([
+            'shared_with' => 'required|exists:users,id',
+            'permission' => 'required|in:view,download',
+            'expires_at' => 'nullable|date|after:now'
+        ]);
+
+        $file = File::where('user_id', Auth::id())->findOrFail($id);
+
+        // Cek apakah sudah di-share dengan user ini
+        $existingShare = FileShare::where('file_id', $file->id)
+            ->where('shared_with', $request->shared_with)
+            ->first();
+
+        if ($existingShare) {
+            $existingShare->update([
+                'permission' => $request->permission,
+                'expires_at' => $request->expires_at
+            ]);
+        } else {
+            FileShare::create([
+                'file_id' => $file->id,
+                'shared_by' => Auth::id(),
+                'shared_with' => $request->shared_with,
+                'permission' => $request->permission,
+                'expires_at' => $request->expires_at
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'File berhasil dibagikan!']);
+    }
+
+    public function getSharedFiles()
+    {
+        $sharedFiles = FileShare::with(['file', 'sharedBy'])
+            ->where('shared_with', Auth::id())
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->get();
+
+        return view('pages.shared', compact('sharedFiles'));
     }
 }

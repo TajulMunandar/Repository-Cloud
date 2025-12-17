@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MyApp</title>
+    <title>Reset Password - MyApp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -32,7 +32,8 @@
         <div class="row justify-content-center">
             <div class="col-md-5">
                 <div class="card p-4">
-                    <h3 class="text-center mb-4">🔐 Login</h3>
+                    <h3 class="text-center mb-4">🔑 Reset Password</h3>
+
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">
@@ -42,40 +43,46 @@
                             </ul>
                         </div>
                     @endif
-                    <form action="/login" method="POST">
+
+                    <form action="{{ route('password.update') }}" method="POST">
                         @csrf
+
+                        <input type="hidden" name="token" value="{{ request()->route('token') }}">
+
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email / Username</label>
-                            <input type="text" class="form-control @error('email') is-invalid @enderror"
-                                id="email" name="email" value="{{ old('email') }}"
-                                placeholder="Enter email or username" required>
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                id="email" name="email" value="{{ old('email', request('email')) }}"
+                                placeholder="Enter your email" required>
                             @error('email')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
                             @enderror
                         </div>
+
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">New Password</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                id="password" name="password" placeholder="Enter password" required>
+                                id="password" name="password" placeholder="Enter new password" required>
                             @error('password')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
                             @enderror
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <input type="checkbox" name="remember" id="remember">
-                                <label for="remember">Remember me</label>
-                            </div>
-                            <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot Password?</a>
+
+                        <div class="mb-3">
+                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="password_confirmation"
+                                name="password_confirmation" placeholder="Confirm new password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+
+                        <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                     </form>
-                    <p class="text-center mt-3">Don't have an account?
-                        <a href="{{ route('register') }}">Register</a>
+
+                    <p class="text-center mt-3">
+                        <a href="{{ route('login') }}">Back to Login</a>
                     </p>
                 </div>
             </div>

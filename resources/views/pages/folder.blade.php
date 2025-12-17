@@ -7,26 +7,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('files.index') }}">Home</a></li>
-                        @if ($currentFolder)
-                            @php
-                                $path = [];
-                                $folder = $currentFolder;
-                                while ($folder) {
-                                    array_unshift($path, $folder);
-                                    $folder = $folder->parent;
-                                }
-                            @endphp
-                            @foreach ($path as $folder)
-                                <li class="breadcrumb-item">
-                                    @if ($folder->id == $currentFolder->id)
-                                        {{ $folder->name }}
-                                    @else
-                                        <a
-                                            href="{{ route('files.index', ['folder_id' => $folder->id]) }}">{{ $folder->name }}</a>
-                                    @endif
-                                </li>
-                            @endforeach
-                        @endif
+                        <li class="breadcrumb-item active">{{ $folder->name }}</li>
                     </ol>
                 </nav>
             </div>
@@ -34,17 +15,11 @@
 
         <div class="row mb-4">
             <div class="col d-flex justify-content-between align-items-center">
-                <h2 class="fw-bold mb-0">
-                    @if ($currentFolder)
-                        📁 {{ $currentFolder->name }}
-                    @else
-                        📁 My Files
-                    @endif
-                </h2>
+                <h2 class="fw-bold mb-0">📁 {{ $folder->name }}</h2>
                 <div>
                     <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-                        data-bs-target="#createFolderModal">
-                        📁 New Folder
+                        data-bs-target="#createSubFolderModal">
+                        📁 New Subfolder
                     </button>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
                         ⬆ Upload File
@@ -53,82 +28,23 @@
             </div>
         </div>
 
-        <div class="row mb-4">
-            <!-- Total Bandwidth -->
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted">Total Throughput Terpakai</h6>
-                        <h3 class="fw-bold text-warning">
-                            {{ number_format($files->sum('upload_bw') / 1024 / 1024, 2) }} MB
-                        </h3>
-                        <small class="text-muted">Semua resource yang sudah dipakai</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Files -->
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted">Total Ukuran </h6>
-                        <h3 class="fw-bold text-primary">
-                            {{ number_format($files->sum('file_size') / 1024 / 1024, 2) }} MB
-                            @if (Auth::check() && Auth::user()->is_admin == 1)
-                                <span class="text-success">/ ♾️ Unlimited</span>
-                            @else
-                                <span class="text-danger">/ 1024 MB</span>
-                            @endif
-                        </h3>
-                        <small class="text-muted">Semua file yang sudah diupload</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
-                    <div class="card-body text-center">
-                        <h6 class="text-muted">Total File Terupload</h6>
-                        <h3 class="fw-bold text-success">
-                            {{ $files->count() }} File
-                        </h3>
-                        <small class="text-muted">Jumlah keseluruhan file tersimpan</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col d-flex">
-                <button type="button" class="btn btn-primary btn-lg shadow-sm mb-3 me-2" data-bs-toggle="modal"
-                    data-bs-target="#uploadModal">
-                    ⬆ Upload File
-                </button>
-                <a href="{{ route('files.trash') }}" class="btn btn-info btn-lg shadow-sm mb-3 ">
-                    <span><i class="fa fa-trash"></i> History File</span>
-                </a>
-            </div>
-        </div>
-        <!-- Trigger Button -->
-
-
-        <!-- Create Folder Modal -->
-        <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel"
+        <!-- Create Subfolder Modal -->
+        <div class="modal fade" id="createSubFolderModal" tabindex="-1" aria-labelledby="createSubFolderModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="createFolderModalLabel">Create New Folder</h5>
+                        <h5 class="modal-title" id="createSubFolderModalLabel">Create Subfolder</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="createFolderForm">
+                        <form id="createSubFolderForm">
                             @csrf
                             <div class="mb-3">
-                                <label for="folderName" class="form-label">Folder Name</label>
-                                <input type="text" class="form-control" id="folderName" name="name" required>
+                                <label for="subFolderName" class="form-label">Folder Name</label>
+                                <input type="text" class="form-control" id="subFolderName" name="name" required>
                             </div>
-                            <button type="submit" class="btn btn-success">Create Folder</button>
+                            <button type="submit" class="btn btn-success">Create Subfolder</button>
                         </form>
                     </div>
                 </div>
@@ -139,54 +55,40 @@
         <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
-                    <!-- Modal Header -->
                     <div class="modal-header text-white" style="background: linear-gradient(135deg, #4e73df, #1cc88a);">
                         <h5 class="modal-title fw-bold" id="uploadModalLabel">📂 Upload File</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
-                    <!-- Modal Body -->
                     <div class="modal-body p-4">
                         <form id="uploadForm" enctype="multipart/form-data">
                             @csrf
-                            <input type="hidden" name="folder_id" value="{{ $currentFolder ? $currentFolder->id : '' }}">
+                            <input type="hidden" name="folder_id" value="{{ $folder->id }}">
                             <div class="mb-3">
                                 <label for="file" class="form-label fw-semibold">Choose File</label>
                                 <div class="file-upload-wrapper rounded-3 border border-2 border-dashed text-center p-4"
                                     id="fileDropArea">
-                                    <div class="upload-icon mb-2">
-                                        📂
-                                    </div>
+                                    <div class="upload-icon mb-2">📂</div>
                                     <p class="mb-1 fw-bold">Drag & Drop file here</p>
                                     <p class="text-muted small">or click to select from your device</p>
                                     <input type="file" class="form-control d-none" name="file" id="file"
                                         required>
                                     <button type="button" class="btn btn-sm btn-gradient mt-2"
-                                        onclick="document.getElementById('file').click()">
-                                        Browse File
-                                    </button>
+                                        onclick="document.getElementById('file').click()">Browse File</button>
                                     <p class="mt-2 fw-semibold text-primary d-none" id="fileName"></p>
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="expired_date" class="form-label fw-semibold">Expired Date (Optional)</label>
                                 <input type="date" class="form-control form-control-lg rounded-3" name="expired_date"
                                     id="expired_date">
                             </div>
-
-                            <button type="submit" class="btn btn-gradient w-100 py-2 rounded-3 fw-bold">
-                                ⬆ Upload Sekarang
-                            </button>
+                            <button type="submit" class="btn btn-gradient w-100 py-2 rounded-3 fw-bold">⬆ Upload
+                                Sekarang</button>
                         </form>
-
-                        <!-- Progress Bar -->
                         <div class="progress mt-4 d-none rounded-3" id="uploadProgressContainer" style="height: 28px;">
-                            <div id="uploadProgress"
-                                class="progress-bar progress-bar-striped progress-bar-animated fw-bold" role="progressbar"
-                                style="width: 0%">0%
-                            </div>
+                            <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated fw-bold"
+                                role="progressbar" style="width: 0%">0%</div>
                         </div>
                         <small id="uploadStats" class="text-muted d-none mt-2"></small>
                     </div>
@@ -196,17 +98,15 @@
 
         <!-- Grid View -->
         <div class="row">
-            <!-- Folders -->
-            @foreach ($folders as $folder)
+            <!-- Subfolders -->
+            @foreach ($folders as $subfolder)
                 <div class="col-md-3 col-sm-6 mb-4">
                     <div class="card h-100 folder-card"
-                        onclick="window.location='{{ route('files.index', ['folder_id' => $folder->id]) }}'">
+                        onclick="window.location='{{ route('folders.show', $subfolder->id) }}'">
                         <div class="card-body text-center">
-                            <div class="folder-icon mb-3">
-                                📁
-                            </div>
-                            <h6 class="card-title">{{ $folder->name }}</h6>
-                            <small class="text-muted">{{ $folder->files->count() }} files</small>
+                            <div class="folder-icon mb-3">📁</div>
+                            <h6 class="card-title">{{ $subfolder->name }}</h6>
+                            <small class="text-muted">{{ $subfolder->files->count() }} files</small>
                         </div>
                     </div>
                 </div>
@@ -217,15 +117,13 @@
                 <div class="col-md-3 col-sm-6 mb-4">
                     <div class="card h-100 file-card">
                         <div class="card-body text-center">
-                            <div class="file-icon mb-3">
-                                📄
-                            </div>
+                            <div class="file-icon mb-3">📄</div>
                             <h6 class="card-title text-truncate" title="{{ $file->file_name }}">{{ $file->file_name }}
                             </h6>
                             <small class="text-muted">{{ number_format($file->file_size / 1024, 2) }} KB</small>
                             <div class="mt-3">
-                                <a href="{{ route('files.view', $file->id) }}"
-                                    class="btn btn-sm btn-outline-info me-1">👁</a>
+                                <a href="{{ route('files.show', $file->id) }}"
+                                    class="btn btn-sm btn-outline-info me-1">Detail</a>
                                 <a href="{{ route('files.download', $file->id) }}"
                                     class="btn btn-sm btn-outline-success me-1">⬇</a>
                                 <button class="btn btn-sm btn-outline-warning me-1"
@@ -249,7 +147,7 @@
                 <div class="empty-state">
                     📂
                     <h4 class="mt-3">Folder kosong</h4>
-                    <p class="text-muted">Belum ada file atau folder di sini.</p>
+                    <p class="text-muted">Belum ada file atau subfolder di sini.</p>
                 </div>
             </div>
         @endif
@@ -328,7 +226,6 @@
             const fileName = document.getElementById('fileName');
 
             fileDropArea.addEventListener('click', () => fileInput.click());
-
             fileInput.addEventListener('change', function() {
                 if (this.files.length > 0) {
                     fileName.classList.remove('d-none');
@@ -348,7 +245,6 @@
             fileDropArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 fileDropArea.classList.remove('dragover');
-
                 if (e.dataTransfer.files.length > 0) {
                     fileInput.files = e.dataTransfer.files;
                     fileName.classList.remove('d-none');
@@ -358,7 +254,6 @@
 
             document.getElementById("uploadForm").addEventListener("submit", function(e) {
                 e.preventDefault();
-
                 let form = e.target;
                 let formData = new FormData(form);
                 let xhr = new XMLHttpRequest();
@@ -378,11 +273,9 @@
                         let percent = Math.round((e.loaded / e.total) * 100);
                         progressBar.style.width = percent + "%";
                         progressBar.innerText = percent + "%";
-
                         let elapsedTime = (new Date().getTime() - startTime) / 1000;
                         let speed = (e.loaded / 1024 / elapsedTime).toFixed(2);
                         lastSpeed = speed;
-
                         uploadStats.innerText = `⏱ ${elapsedTime.toFixed(2)}s | ⚡ ${speed} KB/s`;
                     }
                 });
@@ -392,12 +285,9 @@
                         if (xhr.status === 200) {
                             progressBar.classList.remove("bg-danger");
                             progressBar.classList.add("bg-success");
-
                             let endTime = new Date().getTime();
                             let uploadDuration = (endTime - startTime) / 1000;
-
                             uploadStats.innerText += " ✅ Upload Selesai";
-
                             fetch("{{ route('files.updateUploadStats') }}", {
                                 method: "POST",
                                 headers: {
@@ -411,7 +301,6 @@
                                     upload_bw: lastSpeed
                                 })
                             });
-
                             setTimeout(() => location.reload(), 1500);
                         } else {
                             progressBar.classList.add("bg-danger");
@@ -425,14 +314,11 @@
                 xhr.send(formData);
             });
 
-            // Create folder functionality
-            document.getElementById("createFolderForm").addEventListener("submit", function(e) {
+            // Create subfolder functionality
+            document.getElementById("createSubFolderForm").addEventListener("submit", function(e) {
                 e.preventDefault();
-
                 let formData = new FormData(this);
-                @if ($currentFolder)
-                    formData.append('parent_id', '{{ $currentFolder->id }}');
-                @endif
+                formData.append('parent_id', '{{ $folder->id }}');
 
                 fetch("{{ route('folders.store') }}", {
                         method: "POST",
@@ -478,10 +364,8 @@
 
             // Share file function
             function shareFile(fileId) {
-                // Simple share modal - in real app, you'd want a proper modal
                 let userId = prompt("Enter user ID to share with:");
                 let permission = confirm("Allow download? (OK for yes, Cancel for view only)") ? 'download' : 'view';
-
                 if (userId) {
                     fetch(`{{ url('/files') }}/${fileId}/share`, {
                             method: "POST",

@@ -56,12 +56,15 @@
                     </a>
                 @endif
                 <a href="{{ route('files.index') }}"
-                    class="vironeer-sidebar-link  {{ request()->is('files*') ? 'current' : '' }} ">
+                    class="vironeer-sidebar-link  {{ request()->is('files*') && !request()->is('files/shared') ? 'current' : '' }} ">
                     <p class="vironeer-sidebar-link-title">
-                        <span><i class="fa fa-upload"></i>{{ __('Manage Uploads') }}</span>
-                        {{-- @if ($unviewedUsersCount)
-                            <span class="counter">{{ $unviewedUsersCount }}</span>
-                        @endif --}}
+                        <span><i class="fa fa-upload"></i>{{ __('My Files') }}</span>
+                    </p>
+                </a>
+                <a href="{{ route('files.shared') }}"
+                    class="vironeer-sidebar-link  {{ request()->is('files/shared') ? 'current' : '' }} ">
+                    <p class="vironeer-sidebar-link-title">
+                        <span><i class="fa fa-share-alt"></i>{{ __('Shared Files') }}</span>
                     </p>
                 </a>
             </div>
